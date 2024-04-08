@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Thư Viện Online nhóm 13</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        body {
+            background-image:
+                    url("https://cf.shopee.vn/file/e8ff93e79015d389028ee1207c930041");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 100% 100%;
+        }
+        .checkedstar {
+            color: orange;
+        }
+        nav{
+            height: 60px;
+        }
+        .theloai{
+            background-color: #fff;
+            border-left: 5px solid #eeeeee;
+        }
+        .list-truyen{
+            background-color: #fff;
+        }
+        .theloai div{
+            margin-top: 15px;
+        }
+        .single-story{
+            height: 300px;
+            margin-top: 15px;
+        }
+        .img-single{
+            width: 100%;
+            height: 200px;
+        }
+
+        .chitiettruyen{
+            border: 2px solid #000;
+            border-style: dotted;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .chitiettruyen p{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="trang-chu">Book store</a>
+        </div>
+        <ul class="nav navbar-nav" sec:authorize="!isAuthenticated()">
+            <li><a href="trang-chu">Trang chủ</a></li>
+            <li><a href="login">Đăng nhập</a></li>
+            <li><a href="regis">Đăng ký</a></li>
+        </ul>
+        <ul class="nav navbar-nav" sec:authorize="isAuthenticated()">
+            <li><a href="trang-chu">Trang chủ</a></li>
+            <li><a href="cart">giỏ hàng</a></li>
+            <li><a href="login">Đơn mua hàng</a></li>
+            <li><a href="logout">Đăng xuất</a></li>
+        </ul>
+        <form class="navbar-form navbar-left" action="/action_page.php">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search">
+                <div class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</nav>
+
+
+<div class="container">
+    <div class="card">
+        <div class="container-fliud">
+            <div class="wrapper row">
+                <div class="preview col-md-6">
+
+                    <div class="preview-pic tab-content">
+                        <div class="tab-pane active" id="pic-1"><img style="width: 400px;height: 250px" th:src="${book.anh}" /></div>
+                    </div>
+                </div>
+                <div class="details col-md-6">
+                    <h3 class="product-title" th:text = "${book.tieude}"></h3>
+
+                    <p class="product-description"  th:text = "${book.mota}"> .</p>
+<!--                    <h4 class="price">current price: <span>$180</span></h4>-->
+
+                    <div class="action">
+                        <form method="post" action="addToCart">
+                            <input min="1" value="1" style="width: 80px;" type="number" name="quantity">
+                            <input type="number" style="display: none" name="id" th:value="${book.id}">
+                            <button class="add-to-cart btn btn-default" type="submit">thêm giỏ hàng</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+
+                    <section>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-5 col-md-6 col-12 pb-4">
+                                    <h1>Bình luận về sách</h1>
+                                    <div th:each="comment: ${listComment}" class="comment mt-4 text-justify float-left">
+                                        <h4 th:text="${comment.user.email}"></h4>
+                                        <span th:text="${comment.createdDate}">- 20 October, 2018</span>
+                                        <br>
+                                        <p th:text="${comment.content}"></p>
+                                        <div sec:authorize="isAuthenticated()">
+                                             <span th:if="${#authentication.getPrincipal().getUsername()} eq ${comment.user.email}">
+                                            <a th:href="@{deletecomment(id=${comment.id})}"><i class="fa fa-trash"></i></a>
+                                        </span>
+                                        </div>
+                                        <hr>
+                                    </div>
+
+                                </div>
+                                <div sec:authorize="isAuthenticated()" class="col-lg-4 col-md-5 col-sm-4 offset-md-1 offset-sm-1 col-12 mt-4">
+                                    <form id="algin-form" th:object="${comment}" method="post" action="commentBook">
+                                        <div class="form-group">
+                                            <h4>Leave a comment</h4>
+                                            <label for="message">Message</label>
+                                            <textarea th:field="*{content}" name="msg" id=""msg cols="30" rows="5" class="form-control" style="background-color: black;"></textarea>
+                                        </div>
+                                        <input type="number" style="display: none" th:field="*{star}" name="star" id="star">
+                                        <input type="hidden" name="bookid"  th:value="${book.id}">
+                                        <span id="1" onclick="star(this,1)" class="fa fa-star"></span>
+                                        <span id="2" onclick="star(this,2)" class="fa fa-star"></span>
+                                        <span id="3" onclick="star(this,3)" class="fa fa-star"></span>
+                                        <span id="4" onclick="star(this,4)" class="fa fa-star"></span>
+                                        <span id="5" onclick="star(this,5)" class="fa fa-star"></span>
+                                        <div class="form-group">
+                                            <button type="submit" id="post" class="btn-success">Post Comment</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script type="text/javascript">
+    function star(e, num) {
+        if (num === 1) {
+            e.classList.add("checkedstar");
+            document.getElementById("2").classList.remove("checkedstar");
+            document.getElementById("3").classList.remove("checkedstar");
+            document.getElementById("4").classList.remove("checkedstar");
+            document.getElementById("5").classList.remove("checkedstar");
+        }
+        if (num == 2) {
+            document.getElementById("1").classList.add("checkedstar");
+            document.getElementById("2").classList.add("checkedstar");
+            document.getElementById("3").classList.remove("checkedstar");
+            document.getElementById("4").classList.remove("checkedstar");
+            document.getElementById("5").classList.remove("checkedstar");
+        }
+        if (num == 3) {
+            document.getElementById("1").classList.add("checkedstar");
+            document.getElementById("2").classList.add("checkedstar");
+            document.getElementById("3").classList.add("checkedstar");
+            document.getElementById("4").classList.remove("checkedstar");
+            document.getElementById("5").classList.remove("checkedstar");
+        }
+        if (num == 4) {
+            document.getElementById("1").classList.add("checkedstar");
+            document.getElementById("2").classList.add("checkedstar");
+            document.getElementById("3").classList.add("checkedstar");
+            document.getElementById("4").classList.add("checkedstar");
+            document.getElementById("5").classList.remove("checkedstar");
+        }
+        if (num == 5) {
+            document.getElementById("1").classList.add("checkedstar");
+            document.getElementById("2").classList.add("checkedstar");
+            document.getElementById("3").classList.add("checkedstar");
+            document.getElementById("4").classList.add("checkedstar");
+            document.getElementById("5").classList.add("checkedstar");
+        }
+        document.getElementById("star").value = num
+    }
+</script>
+</html>
